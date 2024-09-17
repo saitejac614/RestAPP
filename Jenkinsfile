@@ -3,14 +3,14 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        DOCKERHUB_REPO = 'yourdockerhubusername/your-repository'
+        DOCKERHUB_REPO = 'saitejac614/restapp'
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 // Checkout the code from GitHub
-                git branch: 'main', url: 'https://github.com/yourusername/yourrepository.git'
+                git branch: 'main', url: 'https://github.com/saitejac614/RestAPP.git'
             }
         }
 
