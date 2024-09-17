@@ -1,29 +1,65 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKERHUB_REPO = 'yourdockerhubusername/your-repository'
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/saitejac614/RestAPP.git'
+                // Checkout the code from GitHub
+                git branch: 'main', url: 'https://github.com/yourusername/yourrepository.git'
             }
         }
 
-        stage('Build') {
+        stage('Build Java Application') {
             steps {
-                sh 'mvn clean package'  // Adjust for your build tool
+                // Build the Java application using Maven
+                sh 'mvn clean package'
             }
         }
 
-        stage('Test') {
+        stage('Run Tests') {
             steps {
+                // Run tests using Maven
                 sh 'mvn test'
             }
         }
 
-        stage('Deploy') {
+        stage('Build Docker Image') {
             steps {
-                // Add deployment steps (e.g., SCP or SSH to deploy to an EC2 instance)
+                script {
+                    // Build the Docker image
+                    def image = docker.build("${DOCKERHUB_REPO}:${env.BUILD_ID}")
+                }
             }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    // Push the image to Docker Hub
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        def image = docker.image("${DOCKERHUB_REPO}:${env.BUILD_ID}")
+                        image.push()
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up the Docker images
+            sh 'docker rmi ${DOCKERHUB_REPO}:${env.BUILD_ID} || true'
+        }
+        success {
+            echo 'Build, Test, and Docker Push completed successfully.'
+        }
+        failure {
+            echo 'Build failed.'
         }
     }
 }
