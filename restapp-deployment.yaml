@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restapp-deployment
+spec:
+  replicas: 2  # Set the number of replicas to 2
+  selector:
+    matchLabels:
+      app: restapp
+  template:
+    metadata:
+      labels:
+        app: restapp
+    spec:
+      containers:
+      - name: restapp
+        image: saitejac614/restapp:RestApp  # Ensure the image tag is correct
+        ports:
+        - containerPort: 8080
